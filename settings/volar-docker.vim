@@ -21,6 +21,7 @@ function! Vim_lsp_settings_volar_setup_ts_path(options) abort
   return initialization_options
 endfunction
 
+" cf. https://github.com/johnsoncodehk/volar/blob/master/packages/shared/src/types.ts
 let g:vim_lsp_settings_volar_options = {
 \   'typescript': {
 \     'serverPath': '',
@@ -28,6 +29,7 @@ let g:vim_lsp_settings_volar_options = {
 \   },
 \   'languageFeatures': {
 \     'references': v:true,
+\     'implementation': v:true,
 \     'definition': v:true,
 \     'typeDefinition': v:true,
 \     'callHierarchy': v:true,
@@ -44,32 +46,31 @@ let g:vim_lsp_settings_volar_options = {
 \     'documentHighlight': v:true,
 \     'documentLink': v:true,
 \     'workspaceSymbol': v:true,
-\     'codeLens': v:true,
+\     'codeLens': { 'showReferencesNotification': v:true },
 \     'semanticTokens': v:true,
 \     'codeAction': v:true,
+\     'inlayHints': v:false,
 \     'diagnostics': v:true,
-\     'schemaRequestService': v:true,
+\     'schemaRequestService': { 'getDocumentContentRequest': v:true },
 \   },
 \   'documentFeatures': {
 \     'selectionRange': v:true,
 \     'foldingRange': v:true,
 \     'linkedEditingRange': v:true,
 \     'documentSymbol': v:true,
-\     'documentColor': v:true,
-\     'documentFormatting': {
-\       'defaultPrintWidth': 100,
-\       'getDocumentPrintWidthRequest': v:false,
-\     },
+\     'documentColor': v:false,
+\     'documentFormatting': v:true,
 \   }
 \ }
 
-let g:vim_lsp_settings_volar_api_options = {
+let g:vim_lsp_settings_volar_main_options = {
 \   'typescript': {
 \     'serverPath': '',
 \     'localizedPath': v:null,
 \   },
 \   'languageFeatures': {
 \     'references': v:true,
+\     'implementation': v:true,
 \     'definition': v:true,
 \     'typeDefinition': v:true,
 \     'callHierarchy': v:true,
@@ -85,11 +86,11 @@ let g:vim_lsp_settings_volar_api_options = {
 \       'getDocumentNameCasesRequest': v:false,
 \       'getDocumentSelectionRequest': v:false,
 \     },
-\     'schemaRequestService': v:true,
+\     'schemaRequestService': { 'getDocumentContentRequest': v:true },
 \   }
 \}
 
-let g:vim_lsp_settings_volar_doc_options = {
+let g:vim_lsp_settings_volar_second_options = {
 \   'typescript': {
 \     'serverPath': '',
 \     'localizedPath': v:null,
@@ -97,14 +98,15 @@ let g:vim_lsp_settings_volar_doc_options = {
 \   'languageFeatures': {
 \     'documentHighlight': v:true,
 \     'documentLink': v:true,
-\     'codeLens': v:true,
+\     'codeLens': { 'showReferencesNotification': v:true },
 \     'semanticTokens': v:true,
+\     'inlayHints': v:false,
 \     'diagnostics': v:true,
-\     'schemaRequestService': v:true,
+\     'schemaRequestService': { 'getDocumentContentRequest': v:true },
 \   }
 \}
 
-let g:vim_lsp_settings_volar_html_options = {
+let g:vim_lsp_settings_volar_document_options = {
 \   'typescript': {
 \     'serverPath': '',
 \     'localizedPath': v:null,
@@ -114,54 +116,8 @@ let g:vim_lsp_settings_volar_html_options = {
 \     'foldingRange': v:true,
 \     'linkedEditingRange': v:true,
 \     'documentSymbol': v:true,
-\     'documentColor': v:true,
-\     'documentFormatting': {
-\       'defaultPrintWidth': 100,
-\       'getDocumentPrintWidthRequest': v:false,
-\     },
-\   }
-\ }
-
-let g:vim_lsp_settings_volar_config = {
-\   'volar-api': {
-\     'trace': { 'server': 'off' },
-\   },
-\   'volar-document': {
-\     'trace': { 'server': 'off' },
-\   },
-\   'volar-html': {
-\     'trace': { 'server': 'off' },
-\   },
-\   'volar': {
-\     'lowPowerMode': v:false,
-\     'codeLens': {
-\       'references': v:false,
-\       'pugTools': v:false,
-\       'scriptSetupTools': v:false,
-\     },
-\     'formatting': {
-\       'printWidth': 100,
-\     },
-\     'icon': {
-\       'splitEditors': v:false,
-\       'preview': v:false,
-\       'finder': v:false,
-\     },
-\     'autoWrapParentheses': v:true,
-\     'autoCompleteRefs': v:true,
-\     'takeOverMode': {
-\       'enabled': v:false,
-\     },
-\     'completion': {
-\       'preferredTagNameCase': 'auto',
-\       'preferredAttrNameCase': 'auto-kebab',
-\       'autoImportComponent': v:true,
-\     },
-\     'preview': {
-\       'port': 3333,
-\       'backgroundColor': 'fff',
-\       'transparentGrid': v:false,
-\     },
+\     'documentColor': v:false,
+\     'documentFormatting': v:true
 \   }
 \ }
 
@@ -169,36 +125,33 @@ augroup vim_lsp_settings_volar_server
   au!
   if get(g:, 'vim_lsp_settings_volar_experimental_multiple_servers')
     LspRegisterServer {
-    \ 'name': 'volar-docker-api',
+    \ 'name': 'volar-docker-main',
     \ 'cmd': {server_info->lsp_settings#get('volar-docker', 'cmd', [lsp_settings#exec_path('volar-docker')]+lsp_settings#get('volar-docker', 'args', ['--stdio']))},
     \ 'root_uri':{server_info->lsp_settings#get('volar-docker', 'root_uri', lsp_settings#root_uri('volar-docker'))},
-    \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_api_options)),
-    \ 'allowlist': lsp_settings#get('volar-server', 'allowlist', ['vue']),
+    \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_main_options)),
+    \ 'allowlist': lsp_settings#get('volar-docker', 'allowlist', ['vue']),
     \ 'blocklist': lsp_settings#get('volar-server', 'blocklist', []),
     \ 'config': lsp_settings#get('volar-server', 'config', lsp_settings#server_config('volar-server')),
-    \ 'workspace_config': lsp_settings#get('volar-server', 'workspace_config', g:vim_lsp_settings_volar_config),
     \ }
 
     LspRegisterServer {
-    \ 'name': 'volar-docker-doc',
+    \ 'name': 'volar-docker-second',
     \ 'cmd': {server_info->lsp_settings#get('volar-docker', 'cmd', [lsp_settings#exec_path('volar-docker')]+lsp_settings#get('volar-docker', 'args', ['--stdio']))},
     \ 'root_uri':{server_info->lsp_settings#get('volar-docker', 'root_uri', lsp_settings#root_uri('volar-docker'))},
-    \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_doc_options)),
-    \ 'allowlist': lsp_settings#get('volar-server', 'allowlist', ['vue']),
+    \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_second_options)),
+    \ 'allowlist': lsp_settings#get('volar-docker', 'allowlist', ['vue']),
     \ 'blocklist': lsp_settings#get('volar-server', 'blocklist', []),
     \ 'config': lsp_settings#get('volar-server', 'config', lsp_settings#server_config('volar-server')),
-    \ 'workspace_config': lsp_settings#get('volar-server', 'workspace_config', g:vim_lsp_settings_volar_config),
     \ }
 
     LspRegisterServer {
-    \ 'name': 'volar-docker-html',
+    \ 'name': 'volar-docker-document',
     \ 'cmd': {server_info->lsp_settings#get('volar-docker', 'cmd', [lsp_settings#exec_path('volar-docker')]+lsp_settings#get('volar-docker', 'args', ['--stdio']))},
     \ 'root_uri':{server_info->lsp_settings#get('volar-docker', 'root_uri', lsp_settings#root_uri('volar-docker'))},
-    \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_html_options)),
-    \ 'allowlist': lsp_settings#get('volar-server', 'allowlist', ['vue']),
+    \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_document_options)),
+    \ 'allowlist': lsp_settings#get('volar-docker', 'allowlist', ['vue']),
     \ 'blocklist': lsp_settings#get('volar-server', 'blocklist', []),
     \ 'config': lsp_settings#get('volar-server', 'config', lsp_settings#server_config('volar-server')),
-    \ 'workspace_config': lsp_settings#get('volar-server', 'workspace_config', g:vim_lsp_settings_volar_config),
     \ }
   else
     LspRegisterServer {
@@ -206,10 +159,9 @@ augroup vim_lsp_settings_volar_server
     \ 'cmd': {server_info->lsp_settings#get('volar-docker', 'cmd', [lsp_settings#exec_path('volar-docker')]+lsp_settings#get('volar-docker', 'args', ['--stdio']))},
     \ 'root_uri':{server_info->lsp_settings#get('volar-docker', 'root_uri', lsp_settings#root_uri('volar-docker'))},
     \ 'initialization_options': lsp_settings#get('volar-server', 'initialization_options', Vim_lsp_settings_volar_setup_ts_path(g:vim_lsp_settings_volar_options)),
-    \ 'allowlist': lsp_settings#get('volar-server', 'allowlist', ['vue']),
+    \ 'allowlist': lsp_settings#get('volar-docker', 'allowlist', ['vue']),
     \ 'blocklist': lsp_settings#get('volar-server', 'blocklist', []),
     \ 'config': lsp_settings#get('volar-server', 'config', lsp_settings#server_config('volar-server')),
-    \ 'workspace_config': lsp_settings#get('volar-server', 'workspace_config', g:vim_lsp_settings_volar_config),
     \ }
   endif
 augroup END
