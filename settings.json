@@ -1200,6 +1200,14 @@
       "requires": [
         "gem"
       ]
+    },
+    {
+      "command": "solargraph-docker",
+      "url": "https://github.com/castwide/solargraph",
+      "description": "A Ruby language server.",
+      "requires": [
+        "gem"
+      ]
     }
   ],
   "rust": [
