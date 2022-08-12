@@ -1463,7 +1463,19 @@
       "url": "https://deno.land/",
       "description": "A modern runtime for JavaScript and TypeScript.",
       "requires": []
-    }
+    },
+    {
+      "command": "typescript-language-server-docker",
+      "url": "https://github.com/typescript-language-server/typescript-language-server",
+      "description": "TypeScript & JavaScript Language Server",
+      "requires": [
+        "npm"
+      ],
+      "root_uri_patterns": [
+        "package.json",
+        "tsconfig.json"
+      ]
+    },
   ],
   "typescriptreact": [
     {
